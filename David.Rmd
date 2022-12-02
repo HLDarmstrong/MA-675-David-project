@@ -1,0 +1,95 @@
+---
+title: "David project"
+author: "Shengbo Wang"
+date: "2022-12-02"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(markdown)
+library(rmarkdown)
+library(knitr)
+library(readxl)
+library(ggplot2)
+library(arsenal)
+library(tinytex)
+library(tidyr)
+library(viridis)
+library(viridisLite)
+library(nortest)
+```
+
+```{r}
+df <- read_xlsx("1717262_Data_5.10.2021_deidentified.xlsx", col_names = T,3)
+names(df)[8]<-paste("InjuryType")
+names(df)[9]<-paste("UB")
+names(df)[13]<-paste("GCS")
+head(df)
+```
+
+```{r}
+boxplot(df$ISS)
+boxplot(df$GCS)
+
+ggplot(df,aes(x=1:nrow(df),y=GCS))+
+  geom_point()+
+  xlab("Index")
+
+ggplot(df,aes(x=1:nrow(df),y=ISS))+
+   geom_point()+
+  xlab("Index")
+
+
+#difference in general
+t.test(df$ISS,df$GCS)
+```
+
+```{r}
+ggplot(df,aes(x=UB,y=GCS))+
+  geom_boxplot(aes(fill=UB)) + 
+  scale_fill_viridis(discrete = TRUE, alpha=1) +   
+  geom_jitter(aes(color=UB))+
+  ggtitle("Boxplot of GCS between Urban and Rural")
+```
+```{r}
+ggplot(df,aes(x=UB,y=ISS))+
+  geom_boxplot(aes(fill=UB)) + 
+  scale_fill_viridis(discrete = TRUE, alpha=1) +   
+  geom_jitter(aes(color=UB))+
+  ggtitle("Boxplot of ISS between Urban and Rural")
+```
+
+```{r}
+ggplot(df,aes(x=InjuryType,y=ISS/length(ISS),fill=UB))+
+  geom_bar(stat="identity", position=position_dodge())
+
+ggplot(df,aes(x=InjuryType,y=GCS/length(GCS),fill=UB))+
+  geom_bar(stat="identity", position=position_dodge())
+```
+
+```{r}
+#check the normality
+shapiro.test(df$ISS)
+shapiro.test(df$GCS)
+
+#Kolmogorov-Smirnov Tests
+ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
+ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
+
+```
+```{r}
+ggplot(df,aes(`Injury Mech`,ISS))+
+  geom_point()+
+  coord_flip()+
+  ggtitle("ISS with Injury Mech")
+
+ggplot(df,aes(`Injury Mech`,GCS))+
+  geom_point()+
+  coord_flip()+
+  ggtitle("GCS with Injury Mech")
+```
+
