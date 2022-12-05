@@ -21,6 +21,10 @@ library(tidyr)
 library(viridis)
 library(viridisLite)
 library(nortest)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(scales)
 ```
 
 ```{r}
@@ -55,6 +59,7 @@ ggplot(df,aes(x=UB,y=GCS))+
   geom_jitter(aes(color=UB))+
   ggtitle("Boxplot of GCS between Urban and Rural")
 ```
+
 ```{r}
 ggplot(df,aes(x=UB,y=ISS))+
   geom_boxplot(aes(fill=UB)) + 
@@ -64,11 +69,11 @@ ggplot(df,aes(x=UB,y=ISS))+
 ```
 
 ```{r}
-ggplot(df,aes(x=InjuryType,y=ISS/length(ISS),fill=UB))+
-  geom_bar(stat="identity", position=position_dodge())
+ggplot(df,aes(InjuryType,fill=UB))+
+  geom_bar(aes(y=(..count..)/sum(..count..)),position = "dodge")+
+  scale_y_continuous(labels=percent)+
+  ylab("percentage")
 
-ggplot(df,aes(x=InjuryType,y=GCS/length(GCS),fill=UB))+
-  geom_bar(stat="identity", position=position_dodge())
 ```
 
 ```{r}
@@ -81,7 +86,9 @@ ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
 ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
 
 ```
+
 ```{r}
+
 ggplot(df,aes(`Injury Mech`,ISS))+
   geom_point()+
   coord_flip()+
