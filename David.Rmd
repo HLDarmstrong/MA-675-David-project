@@ -26,6 +26,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyverse)
 library(scales)
+library(arm)
 ```
 
 \newpage
@@ -62,14 +63,10 @@ ggplot(df,aes(ISS,GCS))+
 
 ```{r}
 ggplot(df,aes(ISS,HospitalDays))+
-  geom_point()
+  geom_point()+
+  geom_smooth()
 ```
 
-
-```{r}
-#difference in general
-t.test(df$ISS,df$GCS)
-```
 
 ```{r, fig.show="hold", out.width="50%"}
 ggplot(df,aes(x=UB,y=GCS,fill=UB))+
@@ -96,15 +93,8 @@ ggplot(df,aes(InjuryType,fill=UB))+
   ylab("percentage")
 ```
 
-```{r}
-#check the normality
-shapiro.test(df$ISS)
-shapiro.test(df$GCS)
 
-#Kolmogorov-Smirnov Tests
-ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
-ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
-```
+
 
 ```{r, fig.show="hold", out.width="50%"}
 ggplot(df,aes(`Injury Mech`,ISS))+
@@ -117,6 +107,46 @@ ggplot(df,aes(`Injury Mech`,GCS))+
   coord_flip()+
   ggtitle("GCS with Injury Mech")
 ```
+## Method
+
+```{r}
+#difference in general
+t.test(df$ISS,df$GCS)
+```
+
+```{r}
+#check the normality
+shapiro.test(df$ISS)
+shapiro.test(df$GCS)
+```
+The Shapiro-Wilk test is a way to tell if a random sample comes from a normal distribution. From the result from the table shows both ISS and GCS are normally distributed at a level at 0.05. 
+
+```{r}
+#Kolmogorov-Smirnov Tests
+ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
+ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
+```
+
+The Kolmogorov-Smirnov (K-S) Test is one method to be used for determining if the underlying distribution of the Rural GCS vs Urban GCS, and Rural ICS vs Urban ICS are in fact different. As the above table shows, both P-values from KS-test are greater than 0.05 that we do not have sufficient evidence to fail to reject that the distributions are same distribution. This means there is no significant difference in GCS and ISS between Rural and Urban.
+
+## Fit In Model
+```{r}
+model <- lm(HospitalDays~ISS+GCS,df)
+summary(model)
+```
+
+```{r}
+coefplot(model)
+```
+
+
+
+## Check the Model
+
+```{r}
+plot(model,c(1,2))
+```
+
 
 ## Discussion
 
