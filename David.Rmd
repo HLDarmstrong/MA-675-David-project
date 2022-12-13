@@ -143,7 +143,7 @@ coefplot(model)
 
 ## Check the Model
 
-```{r}
+```{r, fig.show="hold", out.width="50%"}
 plot(model,c(1,2))
 ```
 
