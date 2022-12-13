@@ -1,12 +1,13 @@
 ---
-title: "David project"
-author: "Shengbo Wang"
-date: "2022-12-02"
-output: word_document
+title: "Oral and Facial Study"
+author: "Tianjian Xie, Amstrong Wang, Haochen Pan, Nuo Chen, Haochen Zhu"
+date: "2022-10-28"
+output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = F,message = F,warning = F)
 ```
 
 ```{r}
@@ -23,49 +24,69 @@ library(viridisLite)
 library(nortest)
 library(dplyr)
 library(ggplot2)
-library(tidyr)
+library(tidyverse)
 library(scales)
 ```
 
-```{r}
+\newpage
+
+## Introduction
+
+Our client is David Cartier from Boston University Henry M. Goldman School of Dental Medicine. The client’s goalis to analyze the different types of facial fractures from Maine Portland medical center and compare injuriesbetween rural and urban populations.The client asked us to compare two different injury assessment scores between rural and urban populations.These scores are the injury severity score (ISS ) and Glasgow coma scale (GCS). The client also asked us toassess the relationship between injury mechanisms and these two scores, as well as explore factors affecting thefrequency of hospital admissions.
+
+## Data Description
+
+The data consists of de-identified medical records for 318 patients from Maine Medical Center. Patients are classified as coming from rural areas or urban areas based on their Zip code and 2010 census data.
+
+The Glasgow Coma Scale (GCS) is used to objectively describe the extent of impaired consciousness in all types of acute medical and trauma patients. The scale assesses patients according to three aspects of responsiveness:eye-opening, motor, and verbal responses. This scale is from 1 to 15 which 13-15 being Mild, 9-12 being Moderate, and 3-8 being Severe.
+
+All injuries are assigned from an internationally recognized dictionary that describes over 2000 injuries. Multiple injuries are scored by adding together the squares of the three highest AIS scores. The ISS is the Injury severity score, which can range from 1 to 75, but we only have from 1 to 50.
+
+```{r,results='hide'}
 df <- read_xlsx("1717262_Data_5.10.2021_deidentified.xlsx", col_names = T,3)
 names(df)[8]<-paste("InjuryType")
 names(df)[9]<-paste("UB")
 names(df)[13]<-paste("GCS")
+df <- df %>% mutate(HospitalDays=df$`Total Hospital Days`) %>% 
+  drop_na(GCS) %>% 
+  drop_na(ISS) %>% 
+  drop_na(HospitalDays)
 head(df)
 ```
 
-```{r}
-boxplot(df$ISS)
-boxplot(df$GCS)
-
-ggplot(df,aes(x=1:nrow(df),y=GCS))+
+```{r,fig.cap="Relationship between ISS and GCS"}
+ggplot(df,aes(ISS,GCS))+
   geom_point()+
-  xlab("Index")
+  geom_smooth()
+```
 
-ggplot(df,aes(x=1:nrow(df),y=ISS))+
-   geom_point()+
-  xlab("Index")
+```{r}
+ggplot(df,aes(ISS,HospitalDays))+
+  geom_point()
+```
 
 
+```{r}
 #difference in general
 t.test(df$ISS,df$GCS)
 ```
 
-```{r}
-ggplot(df,aes(x=UB,y=GCS))+
-  geom_boxplot(aes(fill=UB)) + 
+```{r, fig.show="hold", out.width="50%"}
+ggplot(df,aes(x=UB,y=GCS,fill=UB))+
+  geom_violin(trim=F)+
+  geom_boxplot(width=0.1, fill="white")+
   scale_fill_viridis(discrete = TRUE, alpha=1) +   
   geom_jitter(aes(color=UB))+
-  ggtitle("Boxplot of GCS between Urban and Rural")
-```
+  labs(title="Plot of GCS betweem Rural and Urban", y = "GCS")+
+  geom_hline(yintercept=c(0,15),color="black")
 
-```{r}
-ggplot(df,aes(x=UB,y=ISS))+
-  geom_boxplot(aes(fill=UB)) + 
+ggplot(df,aes(x=UB,y=ISS,fill=UB))+
+  geom_violin(trim=F)+
+  geom_boxplot(width=0.1, fill="white")+
   scale_fill_viridis(discrete = TRUE, alpha=1) +   
   geom_jitter(aes(color=UB))+
-  ggtitle("Boxplot of ISS between Urban and Rural")
+  labs(title="Plot of ISS betweem Rural and Urban", y = "ISS")+
+  geom_hline(yintercept=c(0,50),color="black")
 ```
 
 ```{r}
@@ -73,7 +94,6 @@ ggplot(df,aes(InjuryType,fill=UB))+
   geom_bar(aes(y=(..count..)/sum(..count..)),position = "dodge")+
   scale_y_continuous(labels=percent)+
   ylab("percentage")
-
 ```
 
 ```{r}
@@ -84,11 +104,9 @@ shapiro.test(df$GCS)
 #Kolmogorov-Smirnov Tests
 ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
 ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
-
 ```
 
-```{r}
-
+```{r, fig.show="hold", out.width="50%"}
 ggplot(df,aes(`Injury Mech`,ISS))+
   geom_point()+
   coord_flip()+
@@ -99,4 +117,16 @@ ggplot(df,aes(`Injury Mech`,GCS))+
   coord_flip()+
   ggtitle("GCS with Injury Mech")
 ```
+
+## Discussion
+
+Our analysis of patients come from US 2010 census data shows that there is a negative and interactive relationship between ISS value and GCS value, and is related to urban/rural areas. ISS and GCS are normally distributed at a level at 0.05. In our analysis, urban or rural patients may have similar ISS and be more clustered
+towards the mean. However, the relationship between GCS and urban/rural cannot be directly explained through linear relationship since we have evidence that ISS and GCS are not normally distributed. In the comparison of other variables, we also believe that factors such as hospitalization time and cause of injury have no way to directly affect the GCS value in different urban/rural situations.
+
+
+## Conclusion 
+
+Our linear model suggests that there isn’t evidence that there is a relationship between GCS and whether a patients from a rural or Urban origin. In our analysis, urban or rural patients may have similar ISS and be more clustered towards the mean. However, the linear model suggests that the is not much evidence of a relationship between GCS and whether a patient’s origin is urban or rural. Although the EDA suggests that there may be some relationship between these scores and whether a patient is from a rural or urban origin, our models suggest that there is not enough evidence to conclude that there is such a relationship.
+
+
 
