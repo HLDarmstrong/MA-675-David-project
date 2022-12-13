@@ -33,7 +33,7 @@ library(arm)
 
 ## Introduction
 
-Our client is David Cartier from Boston University Henry M. Goldman School of Dental Medicine. The client’s goalis to analyze the different types of facial fractures from Maine Portland medical center and compare injuriesbetween rural and urban populations.The client asked us to compare two different injury assessment scores between rural and urban populations.These scores are the injury severity score (ISS ) and Glasgow coma scale (GCS). The client also asked us toassess the relationship between injury mechanisms and these two scores, as well as explore factors affecting thefrequency of hospital admissions.
+Our client is David Cartier from Boston University Henry M. Goldman School of Dental Medicine. The client’s goal is to analyze the different types of facial fractures from Maine Portland medical center and compare injuries between rural and urban populations.The client asked us to compare two different injury assessment scores between rural and urban populations.These scores are the injury severity score (ISS ) and Glasgow coma scale (GCS). The client also asked us to assess the relationship between injury mechanisms and these two scores, as well as explore factors affecting the frequency of hospital admissions.
 
 ## Data Description
 
