@@ -68,7 +68,7 @@ ggplot(df,aes(ISS,HospitalDays))+
 ```
 
 
-```{r, fig.show="hold", out.width="50%"}
+```{r, fig.show="hold", out.width="50%",fig.cap="violin plots"}
 ggplot(df,aes(x=UB,y=GCS,fill=UB))+
   geom_violin(trim=F)+
   geom_boxplot(width=0.1, fill="white")+
@@ -85,6 +85,7 @@ ggplot(df,aes(x=UB,y=ISS,fill=UB))+
   labs(title="Plot of ISS betweem Rural and Urban", y = "ISS")+
   geom_hline(yintercept=c(0,50),color="black")
 ```
+Violin plots for ISS and GCS between urban or rural. For ISS, urban or rural patients are likely to have similar ISS, the means are both around 15, and the urban patients’ ISS is more concentrated on the mean. We see that most of the data is concentrated near 15, which corresponds to less-severe injury. The concentration is somewhat larger for Urban compared to Rural. One possible explanation, if we were to speculate, could be that people close to Maine Medical Center might go to Maine Medical Center even if they have less severe injuries, while people further away might not bother traveling that distance if they have less severe injuries. The top of the boxes are high up to the top of the plot and did not show the mean of the data, the violins are also in a strange shape, which means most patients have the highest GCS. So for the GCS, we need to use Kolmogorov–Smirnov test to find the correlation between urban and rural.  
 
 ```{r}
 ggplot(df,aes(InjuryType,fill=UB))+
