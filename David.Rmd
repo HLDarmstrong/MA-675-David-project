@@ -148,6 +148,10 @@ plot(model,c(1,2))
 ```
 
 
+By summary of the model, we notice that the p-value of the coefficient is smaller than 0.05, which means that there does exist statistical significance of that `ISS` and `GCS` impacts the `HospitalDays`, However, seeing that the r-squared statistics, our model can only explain % of the data. Therefore, the linear model doesn't fit well.
+
+
+
 ## Discussion
 
 Our analysis of patients come from US 2010 census data shows that there is a negative and interactive relationship between ISS value and GCS value, and is related to urban/rural areas. ISS and GCS are normally distributed at a level at 0.05. In our analysis, urban or rural patients may have similar ISS and be more clustered
@@ -156,7 +160,7 @@ towards the mean. However, the relationship between GCS and urban/rural cannot b
 
 ## Conclusion 
 
-Our linear model suggests that there isn’t evidence that there is a relationship between GCS and whether a patients from a rural or Urban origin. In our analysis, urban or rural patients may have similar ISS and be more clustered towards the mean. However, the linear model suggests that the is not much evidence of a relationship between GCS and whether a patient’s origin is urban or rural. Although the EDA suggests that there may be some relationship between these scores and whether a patient is from a rural or urban origin, our models suggest that there is not enough evidence to conclude that there is such a relationship.
+Our linear model suggests that there isn’t evidence that there is a relationship between GCS and whether a patients from a rural or Urban origin. In our analysis, urban or rural patients may have similar ISS and be more clustered towards the mean. However, the linear model suggests that the is not much evidence of a relationship between GCS and whether a patient’s origin is urban or rural. Although the EDA suggests that there may be some relationship between these scores and whether a patient is from a rural or urban origin, our models suggest that there is not enough evidence to conclude that there is such a relationship. Additionally, patients with higher GCS and lower ISS could be more likely to stay shortly in the hospital. But our linear model still exists a limitation to give a precise and definite prediction.
 
 
 
