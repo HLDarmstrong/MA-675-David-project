@@ -131,7 +131,7 @@ t.test(df$ISS,df$GCS)
 shapiro.test(df$ISS)
 shapiro.test(df$GCS)
 ```
-The Shapiro-Wilk test is a way to tell if a random sample comes from a normal distribution. From the result from the table shows both ISS and GCS are normally distributed at a level at 0.05. 
+The Shapiro-Wilk test is a way to tell if a random sample comes from a normal distribution. From the output, the p-value < 0.05 implying that the distribution of the data are significantly different from normal distribution. In other words, we can not assume the normality.
 
 ```{r}
 #Kolmogorov-Smirnov Tests
@@ -139,7 +139,7 @@ ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
 ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
 ```
 
-The Kolmogorov-Smirnov (K-S) Test is one method to be used for determining if the underlying distribution of the Rural GCS vs Urban GCS, and Rural ICS vs Urban ICS are in fact different. As the above table shows, both P-values from KS-test are greater than 0.05 that we do not have sufficient evidence to fail to reject that the distributions are same distribution. This means there is no significant difference in GCS and ISS between Rural and Urban.
+The Kolmogorov-Smirnov (K-S) Test is one method to be used for determining if the underlying distribution of the Rural GCS vs Urban GCS, and Rural ICS vs Urban ICS are in fact different. As the above table shows, both P-values from KS-test are greater than 0.05 that we do not have evidence to reject the hypothesis that the distributions are the same distribution. This means there is no significant difference in GCS and ISS between Rural and Urban.
 
 ## Fit In Model
 Model 1
