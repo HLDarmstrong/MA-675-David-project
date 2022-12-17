@@ -1,0 +1,208 @@
+---
+title: "Oral and Facial Study"
+author: "Tianjian Xie, Amstrong Wang, Haochen Pan, Nuo Chen, Haochen Zhu"
+date: "2022-10-28"
+output: html_document
+---
+
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = F,message = F,warning = F)
+```
+
+```{r}
+library(markdown)
+library(rmarkdown)
+library(knitr)
+library(readxl)
+library(ggplot2)
+library(arsenal)
+library(tinytex)
+library(tidyr)
+library(viridis)
+library(viridisLite)
+library(nortest)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(scales)
+library(arm)
+library(car)
+```
+
+\newpage
+
+## Abstract
+
+This study looks at the GCS and the ISS for Maine Portland medical center and how they associate with patients from rural/urban. Comparison based on the KS test of the urban and rural population showed no statistical evidence that the distribution of ISS nor GCS scores differ for patients from rural and urban locations. Regression analysis showed an association between whether a patient has a rural or urban origin and ISS after accounting for some factors. However, this result should be taken with caution since there is a potential confounding effect that individuals closer to Maine Medical Center are less likely to have a more severe injury, which would result in biased observation that the urban locals have a lower ISS. Since the data lacks information on the actual distance from the hospital, the result may be falsely attributing ISS differences to urban origin instead of distance. The regression analysis for GCS suggests no association between GCS and urban versus rural origin. However, the model checking results show substantial enough concerns with model fit. Overall, there does not seem to be evidence of a difference between each score and rural or urban patient origin, and that future modeling that includes confounding distance variables is recommended to make statements about the relationship between urban and rural populations and ISS, GCS, or days in the hospital.
+
+## Introduction
+
+Our client is David Cartier from Boston University Henry M. Goldman School of Dental Medicine. The client’s goal is to analyze the different types of facial fractures from Maine Portland medical center and compare injuries between rural and urban populations.The client asked us to compare two different injury assessment scores between rural and urban populations.These scores are the injury severity score (ISS ) and Glasgow coma scale (GCS). The client also asked us to assess the relationship between injury mechanisms and these two scores, as well as explore factors affecting the frequency of hospital admissions.
+
+## Data Description
+
+The data consists of de-identified medical records for 318 patients from Maine Medical Center. Patients are classified as coming from rural areas or urban areas based on their Zip code and 2010 census data.
+
+The Glasgow Coma Scale (GCS) is used to objectively describe the extent of impaired consciousness in all types of acute medical and trauma patients. The scale assesses patients according to three aspects of responsiveness:eye-opening, motor, and verbal responses. This scale is from 1 to 15 which 13-15 being Mild, 9-12 being Moderate, and 3-8 being Severe.
+
+All injuries are assigned from an internationally recognized dictionary that describes over 2000 injuries. Multiple injuries are scored by adding together the squares of the three highest AIS scores. The ISS is the Injury severity score, which can range from 1 to 75, but we only have from 1 to 50. 
+
+```{r,results='hide'}
+df <- read_xlsx("1717262_Data_5.10.2021_deidentified.xlsx", col_names = T,3)
+names(df)[8]<-paste("InjuryType")
+names(df)[9]<-paste("UB")
+names(df)[13]<-paste("GCS")
+df <- df %>% mutate(HospitalDays=df$`Total Hospital Days`) %>% 
+  drop_na(GCS) %>% 
+  drop_na(ISS) %>% 
+  drop_na(HospitalDays)
+head(df)
+```
+
+
+```{r,fig.cap="Relationship between ISS and GCS"}
+ggplot(df,aes(ISS,GCS))+
+  geom_point()+
+  geom_smooth()
+```
+
+```{r, fig.show="hold", out.width="50%"}
+ggplot(df,aes(x=UB,y=GCS,fill=UB))+
+  geom_violin(trim=F)+
+  geom_boxplot(width=0.1, fill="white")+
+  scale_fill_viridis(discrete = TRUE, alpha=1) +   
+  geom_jitter(aes(color=UB))+
+  labs(title="Plot of GCS betweem Rural and Urban", y = "GCS")+
+  geom_hline(yintercept=c(0,15),color="black")
+
+ggplot(df,aes(x=UB,y=ISS,fill=UB))+
+  geom_violin(trim=F)+
+  geom_boxplot(width=0.1, fill="white")+
+  scale_fill_viridis(discrete = TRUE, alpha=1) +   
+  geom_jitter(aes(color=UB))+
+  labs(title="Plot of ISS betweem Rural and Urban", y = "ISS")+
+  geom_hline(yintercept=c(0,50),color="black")
+```
+
+Violin plots for ISS and GCS between urban or rural. For ISS, urban or rural patients are likely to have similar ISS, the means are both around 15, and the urban patients’ ISS is more concentrated on the mean. We see that most of the data is concentrated near 15, which corresponds to less-severe injury. The concentration is somewhat larger for Urban compared to Rural. One possible explanation, if we were to speculate, could be that people close to Maine Medical Center might go to Maine Medical Center even if they have less severe injuries, while people further away might not bother traveling that distance if they have less severe injuries. The top of the boxes are high up to the top of the plot and did not show the mean of the data, the violins are also in a strange shape, which means most patients have the highest GCS. So for the GCS, we need to use Kolmogorov–Smirnov test to find the correlation between urban and rural. 
+
+```{r}
+ggplot(df,aes(InjuryType,fill=UB))+
+  geom_bar(aes(y=(..count..)/sum(..count..)),position = "dodge")+
+  scale_y_continuous(labels=percent)+
+  ylab("percentage")
+```
+
+## Method
+
+```{r}
+#difference in general
+t.test(df$ISS,df$GCS)
+```
+
+```{r}
+#check the normality
+shapiro.test(df$ISS)
+shapiro.test(df$GCS)
+```
+The Shapiro-Wilk test is a way to tell if a random sample comes from a normal distribution. From the output, the p-value < 0.05 implying that the distribution of the data are significantly different from normal distribution. In other words, we can not assume the normality.
+
+```{r}
+#Kolmogorov-Smirnov Tests
+ks.test(df$ISS[df$UB=="Urban"],df$ISS[df$UB=="Rural"])
+ks.test(df$GCS[df$UB=="Urban"],df$GCS[df$UB=="Rural"])
+```
+
+The Kolmogorov-Smirnov (K-S) Test is one method to be used for determining if the underlying distribution of the Rural GCS vs Urban GCS, and Rural GCS vs Urban GCS are in fact different. As the above table shows, Since the p-value is greatter than .05, we fail to reject the null hypothesis. We do not have sufficient evidence to say that there is a difference between these distributions
+
+## Fit In Model
+### Model 1
+
+```{r}
+na_rows <- c(which(is.na(df$Age)))
+Age_Cleaned_df <- df[-na_rows,]
+model1 <- lm(log(as.numeric(HospitalDays))~ISS+GCS+Gender+UB+Age+Race,Age_Cleaned_df)
+summary(model1)
+```
+
+```{r}
+coefplot(model1)
+```
+
+```{r, echo=FALSE, message= FALSE, warning= FALSE}
+library(car)
+vif(model1)
+```
+
+### Model 2
+
+```{r}
+model2 <- lm(GCS~ISS+Gender+UB+Age+Race,Age_Cleaned_df)
+summary(model2)
+```
+
+```{r}
+coefplot(model2)
+```
+
+```{r, echo=FALSE, message= FALSE, warning= FALSE}
+vif(model2)
+```
+
+### Model 3
+
+```{r}
+model3 <- lm(ISS~GCS+Gender+Race+UB+Age,df)
+summary(model3)
+```
+
+```{r}
+coefplot(model3)
+```
+
+```{r, echo=FALSE, message= FALSE, warning= FALSE}
+vif(model3)
+```
+
+## Check the Model
+Model 1
+```{r, fig.show="hold", out.width="50%"}
+plot(model1,c(1,2))
+```
+
+Model 2
+```{r, fig.show="hold", out.width="50%"}
+plot(model2,c(1,2))
+```
+
+By summary of the model2, we can see that differ from model1, `ISS` and `GCS` now impact the `Age` of the patients more.
+
+Model 3
+```{r, fig.show="hold", out.width="50%"}
+plot(model3,c(1,2))
+```
+
+By summary of the model3, when we are trying to find the influence of `Gender`, `Race`, and `UB`(which is the living area of the patients) on the `ISS`, we can see since the p-value of the `UB` is smaller than 0.05, only `UB` do not have significance influence on the `ISS` of the patients.
+
+
+## Discussion
+
+First, based on the results of the Kolmogorov-Smirnov test, there is insufficient evidence to conclude that there is a difference in distribution of either ISS or GCS scores between rural and urban patient origins. However, the linear model with ISS score as a response suggests that when additional variables are taken into account that patients with urban origins are associated with lower ISS scores. Neither of the other models suggest that there is evidence of association between patient origin and either hospital days or  GCS.
+
+There are two major limitations in this analysis. The first is the concern for confounding that could occur if other variables explain ISS, GCS, or days in the hospital. For example, it could be that distance to the hospital is important as patients may only be transported long distances if they have more severe injuries. This could make it appear as though urban patients have less severe injuries even if they don't in practice as the most local patients may be considered urban. In this way, the existing analysis could be criticized as misleading as the association may disappear with the addition of a distance variable. The second major limitation concerns the GCS model--based on diagnostic plots, some model assumptions do not appear reasonable (such as the normality of the residuals), which means that the p-values and confidence intervals may not be trustworthy. A model with more accurate assumptions may have different results.
+
+
+## Conclusion 
+
+We find that there is evidence from our linear model of an association between ISS and whether a patient is from a rural or urban origin--with the caution that this association may be due to a confounding variable like distance to hospital. We do not find evidence of an association between rural/urban origin and either days in hospital or GCS. For future work, we strongly recommend an analysis which includes this confounding variable and which uses a more robust model, such as quantile regression or a censored linear model, on the GCS outcome.
+
+
+## Contribution
+
+Tianjian Xie: Data cleaning, part of EDA(violin plot and box plot of ISS and GCS, scatter plot of ISS against Total Hospital Days and ISS vs GCS, barplot of Injury Types, models fitting), T test and KS test, writing report.
+Haocheng Zhu: Data cleaning, combining the EDAs for writing slides and report, presentation
+Nuo Chen: Data cleaning, part of EDA(Visualization of ISS against AGE and ISS vs GCS, analysis of Injury Types, models fitting), Presentation for client
+Haochen Pan: Data cleaning, part of EDA(Scatter plot of ISS against Total Hospital Days and ISS vs GCS, models analysis for linear model), writing the slides and report
+Shengbo Wang: Data cleaning, part of EDA(Analysis for injury type, models fitting),KS test analysis, Model analysis for problems of linear model, presentation and writing report
+
